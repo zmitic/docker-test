@@ -26,6 +26,7 @@ services:
       MERCURE_JWT_SECRET: ${CADDY_MERCURE_JWT_SECRET:-!ChangeMe!}
 
   caddy:
+    hostname: "${HOST_NAME}"
     build:
       context: .
       target: symfony_caddy
@@ -53,6 +54,11 @@ services:
       - target: 443
         published: 443
         protocol: udp
+
+networks:
+  default:
+    external:
+      name: mynetwork
 
 ###> doctrine/doctrine-bundle ###
   database:

@@ -11,6 +11,61 @@ A [Docker](https://www.docker.com/)-based installer and runtime for the [Symfony
 3. Run `docker-compose up` (the logs will be displayed in the current shell)
 4. Open `https://localhost` in your favorite web browser and [accept the auto-generated TLS certificate](https://stackoverflow.com/a/15076602/1352334)
 
+## Communication between containers using their host name
+
+Services inside a docker-compose file can communicate with each other using the service names, but when we run two instances of a docker-compose file, services inside docker-compose cannot communicate with the services inside the other docker-compose file until we create a shared network for them.
+Then the services of each docker-compose file can access the other docker-compose file services using their service names(or hostnames).
+
+### Add network
+First we should add a docker network which will be used by all the instances of docker-compose files. To create the new network run:
+
+```
+docker network create --driver=bridge mynetwork
+```
+
+### Set the default network for all the docker-compose services
+Now, we set the network we just created as the default network for the docker compose services. Edit the docker-compose file and add the following lines to the end of the file:
+
+```
+networks:
+  default:
+    external:
+      name: mynetwork
+```
+### Set a hostname for the services
+Now with the applied config, when we run the `docker-compose up` command, we can access to services from another running instance of the docker-compose with service names like **docker-test2_caddy_1**. so we can for example access to the first running instance with:
+
+```
+curl http://docker-test1_caddy_1
+```
+We want to access the first instance, using the name *first.wip* instead of *docker-test1_caddy_1*. Edit the docker-compose file and set the ***hostname*** for the *caddy* service:
+```
+  caddy:
+    hostname: ${HOST_NAME}   # added this line
+    build:
+      context: .
+      target: symfony_caddy
+    ...
+```
+
+Then we can run the docker-compose:
+```
+# First server
+SERVER_NAME=":80" HOST_NAME="first.wip" docker-compose up -d
+# Second server
+SERVER_NAME=":80" HOST_NAME="second.wip" docker-compose up -d
+```
+
+Now we are able to access the first server from the second server:
+
+```
+docker exec -it docker-test2_php_1 sh
+```
+and then:
+```
+curl http://first.wip
+```
+
 ## Features
 
 * Production, development and CI ready
