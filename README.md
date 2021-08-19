@@ -51,9 +51,9 @@ We want to access the first instance, using the name *first.wip* instead of *doc
 Then we can run the docker-compose:
 ```
 # First server
-SERVER_NAME=":80" HOST_NAME="first.wip" docker-compose up -d
+SERVER_NAME=":80" CADDY_HTTP_PORT=80 CADDY_HTTPS_PORT=443 HOST_NAME="first.wip" docker-compose up -d
 # Second server
-SERVER_NAME=":80" HOST_NAME="second.wip" docker-compose up -d
+SERVER_NAME=":80" CADDY_HTTP_PORT=8000 CADDY_HTTPS_PORT=4430 HOST_NAME="second.wip" docker-compose up -d
 ```
 
 Now we are able to access the first server from the second server:
